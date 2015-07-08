@@ -1,0 +1,3 @@
+useDynLib(sellkeNc)
+exportPattern("^[[:alpha:]]+")
+importFrom(Rcpp, evalCpp)

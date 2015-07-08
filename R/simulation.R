@@ -10,9 +10,17 @@ sellkeSim <- function(beta, gamma, nu)
   R <- 0
   t <- 0
   
-  seeds <- sort(nu[-sample(length(nu),size=1)])
+  # Results
+  sim <- data.frame(nu=nu, i=rep(Inf, length(nu)), r=rep(Inf, length(nu)), row.names=1:length(nu))
+  names(nu) <- 1:length(nu)
+  
+  # Initial conditions
+  I1 <- sample(length(nu),size=1)
+  seeds <- sort(nu[-I1])
   iTimes <- 0
   rTimes <- rexp(1, gamma) # Removal times here
+  sim$i[I1] <- iTimes
+  sim$r[I1] <- rTimes
   
   cumPressure <- 0
 
@@ -24,12 +32,15 @@ sellkeSim <- function(beta, gamma, nu)
     tOld <- t
     if (nextInfec < nextRemove)
     {
+      toInfect <- names(minSeed)
       S <- S-1
       I <- I+1
       t <- nextInfec
       iTimes <- c(iTimes,t)
       seeds <- seeds[-which.min(seeds)]
-      rTimes <- c(rTimes,rexp(1,gamma)+t)
+      rt <- rexp(1,gamma) + t
+      rTimes <- c(rTimes,rt)
+      sim[toInfect,2:3] <- c(t,rt)
     }
     else
     {
@@ -41,16 +52,7 @@ sellkeSim <- function(beta, gamma, nu)
     cumPressure <- cumPressure + beta*I*(t-tOld)
   }
   
-  rv <- data.frame(time=c(iTimes,rTimes),event=c(rep("i",length(iTimes)),rep("r",length(rTimes))))
   message("S: ", S, ", I: ", I, ", R: ", R)
-  rv[order(rv$time),]
+  sim
 }
 
-plotsim <- function(sim)
-{
-  events <- split(sim, sim$event)
-  I <- sapply(sim$time, function(t) {
-    sum(events$i$time < t) - sum(events$r$time < t)
-  } )  
-  plot(sim$time, I, type='l')
-}
