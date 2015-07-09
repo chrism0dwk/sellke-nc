@@ -1,18 +1,27 @@
 # Plot functions for epidemics
 
-plotsim <- function(sim,...)
+plot.epidemic <- function(epidemic,type='i',...)
 {
-  sim <- sim[sim$i < Inf,]
-  eventTimes <- sort(c(sim$i,sim$r))
-  I <- sapply(eventTimes, function(t) {
-    sum(sim$i <= t & t < sim$r)
-  } )  
+  epidemic <- lapply(epidemic, function(x) x[epidemic$i < Inf])
+  N <- length(epidemic$i)
+  eventTimes <- sort(c(epidemic$i,epidemic$r))
+  
+  n <- NULL
+  n <- switch (type,
+    i=sapply(eventTimes, function(t) {
+      sum(epidemic$i <= t & t < epidemic$r)
+    } ),
+    r=sapply(eventTimes, function(t) {
+      sum(epidemic$r <= t)
+    })
+  )
 
   # Plot curve
-  plot(eventTimes, I, type='s',...)
+  plot(eventTimes, n, type='s', ylab=switch(type, i="Infected", r="Removed"),...)
   
   # Plot events
-  points(sim$r, rep(0,nrow(sim)), pch=19, cex=1, col='blue')
-  points(sim$i, rep(0,nrow(sim)), pch=19, cex=1, col='red')
+  points(epidemic$r, rep(0,N), pch=19, cex=1, col='blue')
+  points(epidemic$i[epidemic$r<Inf], rep(0,sum(epidemic$r<Inf)), pch=19, cex=1, col='red')
+  points(epidemic$i[epidemic$r==Inf],rep(0,sum(epidemic$r==Inf)), pch=19, cex=1, col='green')
   
 }

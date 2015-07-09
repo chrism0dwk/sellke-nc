@@ -53,6 +53,8 @@ sellkeSim <- function(beta, gamma, nu)
   }
   
   message("S: ", S, ", I: ", I, ", R: ", R)
+  message("Max IIP: ", cumPressure)
+  class(sim) <- "epidemic"
   sim
 }
 
